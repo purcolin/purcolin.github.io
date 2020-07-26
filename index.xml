@@ -1,24 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>My New Hugo Site</title>
-    <link>https://purcolin.github.io/</link>
-    <description>Recent content on My New Hugo Site</description>
+    <title>楹联之美</title>
+    <link>http://example.org/</link>
+    <description>Recent content on 楹联之美</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 23 Jul 2020 19:50:31 +0800</lastBuildDate>
     
-	<atom:link href="https://purcolin.github.io/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="http://example.org/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>Blog</title>
-      <link>https://purcolin.github.io/post/blog/</link>
-      <pubDate>Thu, 23 Jul 2020 19:50:31 +0800</pubDate>
-      
-      <guid>https://purcolin.github.io/post/blog/</guid>
-      <description></description>
-    </item>
     
   </channel>
 </rss>
