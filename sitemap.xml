@@ -3,12 +3,17 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://purcolin.github.io/</loc>
-    <lastmod>2020-07-23T19:50:31+08:00</lastmod>
+    <loc>https://purcolin.github.io/try/</loc>
+    <lastmod>2020-08-03T15:28:14+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://purcolin.github.io/post/</loc>
+    <lastmod>2020-07-23T19:50:31+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://purcolin.github.io/</loc>
     <lastmod>2020-07-23T19:50:31+08:00</lastmod>
   </url>
   
