@@ -10,9 +10,15 @@
         let theme = localStorage.getItem("meek_theme") || "light";
         document.documentElement.setAttribute("data-color-mode", theme);
     </script>
-<meta name="description" content="">
+<meta name="description" content="# 原理
+
+padding
+- valid padding（有效填充）：完全不使用填充。">
 <meta property="og:title" content="重识深度学习：CNN">
-<meta property="og:description" content="">
+<meta property="og:description" content="# 原理
+
+padding
+- valid padding（有效填充）：完全不使用填充。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://purcolin.github.io/post/zhong-shi-shen-du-xue-xi-%EF%BC%9ACNN.html">
 <meta property="og:image" content="https://github.githubassets.com/favicons/favicon.svg">
@@ -72,7 +78,95 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
 </div>
     <div id="content">
-<div class="markdown-body" id="postBody"></div>
+<div class="markdown-body" id="postBody"><h1>原理</h1>
+<p>padding</p>
+<ul>
+<li>valid padding（有效填充）：完全不使用填充。</li>
+<li>half/same padding（半填充/相同填充）：保证输入和输出的feature map尺寸相同。</li>
+<li>full padding（全填充）：在卷积操作过程中，每个像素在每个方向上被访问的次数相同。</li>
+<li>arbitrary padding（任意填充）：人为设定填充。</li>
+</ul>
+<p>paddingmode：</p>
+<ul>
+<li>zeros： 零填充，即用0进行填充</li>
+<li>reflect： 镜像填充，以矩阵边缘为对称轴，将矩阵中的元素对称的填充到最外围</li>
+<li>replicate：重复填充，直接用边缘的像素值进行填充</li>
+<li>circular：循环填充，</li>
+</ul>
+<h1>实操</h1>
+<h2>pytorch实现</h2>
+<pre class="notranslate"><code class="notranslate">class CNN(nn.Module):
+    def __init__(self, num_classes):
+        super(CNN, self).__init__()
+        # 第一个卷积层:输入通道数为1,输出通道数为16,卷积核大小为3x3,步长为1,填充为1
+        self.conv1 = nn.Conv2d(1, 16, kernel_size=3, stride=1, padding=1)
+        self.relu1 = nn.ReLU()  # ReLU激活函数
+        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)  # 最大池化层,池化核大小为2x2,步长为2
+        
+        # 第二个卷积层:输入通道数为16,输出通道数为32,卷积核大小为3x3,步长为1,填充为1
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1)
+        self.relu2 = nn.ReLU()  # ReLU激活函数
+        self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)  # 最大池化层,池化核大小为2x2,步长为2
+        
+        # 全连接层:输入特征向量大小为32*7*7(经过卷积和池化后的特征图大小),输出大小为num_classes
+        self.fc = nn.Linear(32 * 7 * 7, num_classes)
+ 
+    def forward(self, x):
+        # 前向传播过程:依次经过卷积层、ReLU激活函数、最大池化层,最后通过全连接层得到输出
+        x = self.conv1(x)
+        x = self.relu1(x)
+        x = self.pool1(x)
+        x = self.conv2(x)
+        x = self.relu2(x)
+        x = self.pool2(x)
+        x = x.view(x.size(0), -1)  # 将特征图展平成一维向量
+        x = self.fc(x)
+        return x
+
+</code></pre>
+<h2>输入输出</h2>
+<p><code class="notranslate">model_input: [batch_size,height,width,depth]</code></p>
+<h2>模型拆解</h2>
+<h3>1. 卷积核</h3>
+<pre class="notranslate"><code class="notranslate">torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros', device=None, dtype=None)
+</code></pre>
+<ul>
+<li>Input: $(N, C_{in}, H_{in}, W_{in})$ or $(C_{in}, H_{in}, W_{in})$
+</li>
+<li>Output: $(N, C_{out}, H_{out}, W_{out})$ or $(C_{out}, H_{out}, W_{out})$
+</li>
+</ul>
+<p>$H_{out} = \left\lfloor\frac{H_{in}  + 2 \times \text{padding}[0] - \text{dilation}[0]<br>
+\times (\text{kernel_size}[0] - 1) - 1}{\text{stride}[0]} + 1\right\rfloor$</p>
+<p>$W_{out} = \left\lfloor\frac{W_{in}  + 2 \times \text{padding}[1] - \text{dilation}[1]<br>
+\times (\text{kernel_size}[1] - 1) - 1}{\text{stride}[1]} + 1\right\rfloor$</p>
+<p>计算公式：$<br>
+\text{out}(N_i, C_{\text{out}<em>j}) = \text{bias}(C</em>{\text{out}<em>j}) +<br>
+\sum</em>{k = 0}^{C_{\text{in}} - 1} \text{weight}(C_{\text{out}_j}, k) \star \text{input}(N_i, k)$</p>
+<p>其中：</p>
+<p>$\star$ is the valid 2D <code class="notranslate">cross-correlation</code>_ operator</p>
+<p>$N$ 为 batch size</p>
+<p>$C$ 是 number_of_channels,</p>
+<p>$H$ is a height of input planes in pixels, and $W$ is width in pixels.</p>
+<p><code class="notranslate">output_size = ((input_size - dilation*(kernel_size-1) + 2* padding)-1)/stride + 1</code></p>
+<p>参数详解：</p>
+<ul>
+<li>
+<p><code class="notranslate">kernel_size</code> 卷积核尺寸 <code class="notranslate">Tuple</code>&amp;<code class="notranslate">Int</code> 例：<code class="notranslate">（2，3）</code>代表卷积核为2*3，输入<code class="notranslate">3</code>代表卷积核为3*3</p>
+</li>
+<li>
+<p><code class="notranslate">stride</code> 步长 <code class="notranslate">Tuple</code>&amp;<code class="notranslate">Int</code></p>
+</li>
+<li>
+<p><code class="notranslate">padding</code> 填充 <code class="notranslate">Tuple</code>&amp;<code class="notranslate">Int</code> or <code class="notranslate">String {‘valid’, ‘same’}</code></p>
+</li>
+<li>
+<p><code class="notranslate">dilation</code> <code class="notranslate">Tuple</code>&amp;<code class="notranslate">Int</code> kernel points的间距,<a href="https://github.com/vdumoulin/conv_arithmetic/blob/master/README.md">更多可视化</a> <a target="_blank" rel="noopener noreferrer" href="https://github.com/vdumoulin/conv_arithmetic/raw/master/gif/dilation.gif"><img src="https://github.com/vdumoulin/conv_arithmetic/raw/master/gif/dilation.gif" alt="dilation" style="max-width: 100%;"></a></p>
+</li>
+<li>
+<p><code class="notranslate">padding_mode</code> padding的模式 <code class="notranslate">String{'zeros'（default）, 'reflect', 'replicate' or 'circular'} </code></p>
+</li>
+</ul></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
@@ -170,6 +264,6 @@ function iFrameLoading(){
     }
 }
 </script>
-
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 </html>
