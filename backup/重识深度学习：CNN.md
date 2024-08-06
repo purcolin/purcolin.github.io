@@ -35,8 +35,10 @@ class CNN(nn.Module):
 ```
 
 ## 输入输出
-`model_input: [batch_size,height,width,depth]`
-
+```
+model_input: [batch_size,depth,height,width]
+model_output: [batch_size,output]
+```
 
 # 二、模型拆解
 
@@ -56,9 +58,13 @@ $H_{out} = \left\lfloor\frac{H_{in}  + 2 \times \text{padding}[0] - \text{dilati
 $W_{out} = \left\lfloor\frac{W_{in}  + 2 \times \text{padding}[1] - \text{dilation}[1]
                         \times (\text{kernel\_size}[1] - 1) - 1}{\text{stride}[1]} + 1\right\rfloor$
 
-### 计算公式：
+$L =(M-D*(K-1)-1+2P)/S+1$
 
-$\text{out}(N_i, C_{\text{out}_j}) = \text{bias}(C_{\text{out}_j}) + \sum_{k = 0}^{C_{\text{in}} - 1} \text{weight}(C_{\text{out}_j}, k) \star \text{input}(N_i, k)$
+$D=1时，有L =(M-K+2P)/S+1$
+
+### 计算公式：
+$\text{out}(N_i, C_{\text{out}_j}) = \text{bias}(C_{\text{out}_j}) +
+        \sum_{k = 0}^{C_{\text{in}} - 1} \text{weight}(C_{\text{out}_j}, k) \star \text{input}(N_i, k)$
 
  其中：
 
@@ -95,21 +101,17 @@ torch.nn.AvgPool2d(kernel_size, stride=None, padding=0, ceil_mode=False, count_i
 
 维度计算：
 
-$H_{out} = \left\lfloor\frac{H_{in} + 2 * \text{padding[0]} - \text{dilation[0]}
-                    \times (\text{kernel\_size[0]} - 1) - 1}{\text{stride[0]}} + 1\right\rfloor$
+$H_{out} = \left\lfloor\frac{H_{in} + 2 * \text{padding[0]} - \text{dilation[0]}\times (\text{kernel\_size[0]} - 1) - 1}{\text{stride[0]}} + 1\right\rfloor$
 
-$W_{out} = \left\lfloor\frac{W_{in} + 2 * \text{padding[1]} - \text{dilation[1]}
-                    \times (\text{kernel\_size[1]} - 1) - 1}{\text{stride[1]}} + 1\right\rfloor$
+$W_{out} = \left\lfloor\frac{W_{in} + 2 * \text{padding[1]} - \text{dilation[1]}\times (\text{kernel\_size[1]} - 1) - 1}{\text{stride[1]}} + 1\right\rfloor$
 
 ### 计算公式（最大池化为例）
 
-$
-        \begin{aligned}
+$\begin{aligned}
             out(N_i, C_j, h, w) ={} & \max_{m=0, \ldots, kH-1} \max_{n=0, \ldots, kW-1} \\
                                     & \text{input}(N_i, C_j, \text{stride[0]} \times h + m,
                                                    \text{stride[1]} \times w + n)
-        \end{aligned}
-$
+\end{aligned}$
 
 其中$K$表示$Kernel$
 
@@ -129,7 +131,33 @@ $
 
 
 
+# 四、维度变化
+（不考虑batch）
+
+## 输入维度：$(C,H_{in},W_{in})$
+
+- 经过卷积核 
+$(N_{Kernel},C,H_{ks},W_{ks})$
+
+`nn.Conv2d(in_channels=C, out_channels=N, kernel_size=K, stride=S, padding=P, dilation=D)` 
+
+## 卷积后维度 $(N_{Kernel},H_{Kout},W_{Kout})$
+其中$H_{Kout} =(H_{in}-D*(K-1)-1+2P)/S+1$
+
+- 经过激活层，不改变维度
+- 经过池化层
+
+## 池化后维度 $(N_{Kernel}, H_{Pout}, W_{Pout})$
+其中的计算方法同上
+
+$H_{Kout} =(H_{in}-D*(K-1)-1+2P)/S+1$
+![alt text](image-4.png)
 
 
-# 四、外部连接
+
+特殊情况
+- $P=0, S=K时维度变为H/S--(S-K+2P=0时均成立)$
+
+
+# 五、外部连接
 - [可交互的CNN网络可视化](https://poloclub.github.io/cnn-explainer/)

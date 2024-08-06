@@ -112,7 +112,9 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 
 </code></pre>
 <h2>输入输出</h2>
-<p><code class="notranslate">model_input: [batch_size,height,width,depth]</code></p>
+<pre class="notranslate"><code class="notranslate">model_input: [batch_size,depth,height,width]
+model_output: [batch_size,output]
+</code></pre>
 <h1>二、模型拆解</h1>
 <h2>1. 卷积核</h2>
 <pre class="notranslate"><code class="notranslate">torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros', device=None, dtype=None)
@@ -129,8 +131,11 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 \times (\text{kernel_size}[0] - 1) - 1}{\text{stride}[0]} + 1\right\rfloor$</p>
 <p>$W_{out} = \left\lfloor\frac{W_{in}  + 2 \times \text{padding}[1] - \text{dilation}[1]<br>
 \times (\text{kernel_size}[1] - 1) - 1}{\text{stride}[1]} + 1\right\rfloor$</p>
+<p>$L =(M-D*(K-1)-1+2P)/S+1$</p>
+<p>$D=1时，有L =(M-K+2P)/S+1$</p>
 <h3>计算公式：</h3>
-<p>$\text{out}(N_i, C_{\text{out}<em>j}) = \text{bias}(C</em>{\text{out}<em>j}) + \sum</em>{k = 0}^{C_{\text{in}} - 1} \text{weight}(C_{\text{out}_j}, k) \star \text{input}(N_i, k)$</p>
+<p>$\text{out}(N_i, C_{\text{out}<em>j}) = \text{bias}(C</em>{\text{out}<em>j}) +<br>
+\sum</em>{k = 0}^{C_{\text{in}} - 1} \text{weight}(C_{\text{out}_j}, k) \star \text{input}(N_i, k)$</p>
 <p>其中：</p>
 <p>$\star$ is the valid 2D <code class="notranslate">cross-correlation</code>_ operator</p>
 <p>$N$ 为 batch size</p>
@@ -171,18 +176,14 @@ torch.nn.AvgPool2d(kernel_size, stride=None, padding=0, ceil_mode=False, count_i
 </li>
 </ul>
 <p>维度计算：</p>
-<p>$H_{out} = \left\lfloor\frac{H_{in} + 2 * \text{padding[0]} - \text{dilation[0]}<br>
-\times (\text{kernel_size[0]} - 1) - 1}{\text{stride[0]}} + 1\right\rfloor$</p>
-<p>$W_{out} = \left\lfloor\frac{W_{in} + 2 * \text{padding[1]} - \text{dilation[1]}<br>
-\times (\text{kernel_size[1]} - 1) - 1}{\text{stride[1]}} + 1\right\rfloor$</p>
+<p>$H_{out} = \left\lfloor\frac{H_{in} + 2 * \text{padding[0]} - \text{dilation[0]}\times (\text{kernel_size[0]} - 1) - 1}{\text{stride[0]}} + 1\right\rfloor$</p>
+<p>$W_{out} = \left\lfloor\frac{W_{in} + 2 * \text{padding[1]} - \text{dilation[1]}\times (\text{kernel_size[1]} - 1) - 1}{\text{stride[1]}} + 1\right\rfloor$</p>
 <h3>计算公式（最大池化为例）</h3>
-<p>$<br>
-\begin{aligned}<br>
+<p>$\begin{aligned}<br>
 out(N_i, C_j, h, w) ={} &amp; \max_{m=0, \ldots, kH-1} \max_{n=0, \ldots, kW-1} \<br>
 &amp; \text{input}(N_i, C_j, \text{stride[0]} \times h + m,<br>
 \text{stride[1]} \times w + n)<br>
-\end{aligned}<br>
-$</p>
+\end{aligned}$</p>
 <p>其中$K$表示$Kernel$</p>
 <h1>三、相关概念：</h1>
 <h2>padding 方法（padding to where）:</h2>
@@ -199,7 +200,32 @@ $</p>
 <li>replicate：重复填充，直接用边缘的像素值进行填充</li>
 <li>circular：循环填充，</li>
 </ul>
-<h1>四、外部连接</h1>
+<h1>四、维度变化</h1>
+<p>（不考虑batch）</p>
+<h2>输入维度：$(C,H_{in},W_{in})$</h2>
+<ul>
+<li>经过卷积核<br>
+$(N_{Kernel},C,H_{ks},W_{ks})$
+</li>
+</ul>
+<p><code class="notranslate">nn.Conv2d(in_channels=C, out_channels=N, kernel_size=K, stride=S, padding=P, dilation=D)</code></p>
+<h2>卷积后维度 $(N_{Kernel},H_{Kout},W_{Kout})$
+</h2>
+<p>其中$H_{Kout} =(H_{in}-D*(K-1)-1+2P)/S+1$</p>
+<ul>
+<li>经过激活层，不改变维度</li>
+<li>经过池化层</li>
+</ul>
+<h2>池化后维度 $(N_{Kernel}, H_{Pout}, W_{Pout})$
+</h2>
+<p>其中的计算方法同上</p>
+<p>$H_{Kout} =(H_{in}-D*(K-1)-1+2P)/S+1$<br>
+<a target="_blank" rel="noopener noreferrer" href="image-4.png"><img src="image-4.png" alt="alt text" style="max-width: 100%;"></a></p>
+<p>特殊情况</p>
+<ul>
+<li>$P=0, S=K时维度变为H/S--(S-K+2P=0时均成立)$</li>
+</ul>
+<h1>五、外部连接</h1>
 <ul>
 <li><a href="https://poloclub.github.io/cnn-explainer/" rel="nofollow">可交互的CNN网络可视化</a></li>
 </ul></div>
