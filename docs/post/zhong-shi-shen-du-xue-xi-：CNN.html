@@ -127,10 +127,11 @@ model_output: [batch_size,output]
 </li>
 </ul>
 <p>维度计算：</p>
-<p>$H_{out} = \left\lfloor\frac{H_{in}  + 2 \times \text{padding}[0] - \text{dilation}[0]<br>
-\times (\text{kernel_size}[0] - 1) - 1}{\text{stride}[0]} + 1\right\rfloor$</p>
-<p>$W_{out} = \left\lfloor\frac{W_{in}  + 2 \times \text{padding}[1] - \text{dilation}[1]<br>
-\times (\text{kernel_size}[1] - 1) - 1}{\text{stride}[1]} + 1\right\rfloor$</p>
+<p>$$<br>
+H_{out} = \left\lfloor\frac{H_{in}  + 2 \times \text{padding}[0] - \text{dilation}[0] \times (\text{kernel_size}[0] - 1) - 1}{\text{stride}[0]} + 1\right\rfloor<br>
+\</p>
+<p>W_{out} = \left\lfloor\frac{W_{in}  + 2 \times \text{padding}[1] - \text{dilation}[1] \times (\text{kernel_size}[1] - 1) - 1}{\text{stride}[1]} + 1\right\rfloor<br>
+$$</p>
 <p>$L =(M-D*(K-1)-1+2P)/S+1$</p>
 <p>$D=1时，有L =(M-K+2P)/S+1$</p>
 <h3>计算公式：</h3>
