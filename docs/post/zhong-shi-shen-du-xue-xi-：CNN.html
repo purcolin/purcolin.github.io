@@ -10,15 +10,15 @@
         let theme = localStorage.getItem("meek_theme") || "light";
         document.documentElement.setAttribute("data-color-mode", theme);
     </script>
-<meta name="description" content="# 原理
-
-padding
-- valid padding（有效填充）：完全不使用填充。">
+<meta name="description" content="# 一、pytorch实现
+CNN的基础架构：
+![CNN基本结构](https://i-blog.csdnimg.cn/blog_migrate/dd24ffc1b67ac2aa6553ded74168bc47.png)
+其中主要的是卷积层与池化层的实现。">
 <meta property="og:title" content="重识深度学习：CNN">
-<meta property="og:description" content="# 原理
-
-padding
-- valid padding（有效填充）：完全不使用填充。">
+<meta property="og:description" content="# 一、pytorch实现
+CNN的基础架构：
+![CNN基本结构](https://i-blog.csdnimg.cn/blog_migrate/dd24ffc1b67ac2aa6553ded74168bc47.png)
+其中主要的是卷积层与池化层的实现。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://purcolin.github.io/post/zhong-shi-shen-du-xue-xi-%EF%BC%9ACNN.html">
 <meta property="og:image" content="https://github.githubassets.com/favicons/favicon.svg">
@@ -78,23 +78,10 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
 </div>
     <div id="content">
-<div class="markdown-body" id="postBody"><h1>原理</h1>
-<p>padding</p>
-<ul>
-<li>valid padding（有效填充）：完全不使用填充。</li>
-<li>half/same padding（半填充/相同填充）：保证输入和输出的feature map尺寸相同。</li>
-<li>full padding（全填充）：在卷积操作过程中，每个像素在每个方向上被访问的次数相同。</li>
-<li>arbitrary padding（任意填充）：人为设定填充。</li>
-</ul>
-<p>paddingmode：</p>
-<ul>
-<li>zeros： 零填充，即用0进行填充</li>
-<li>reflect： 镜像填充，以矩阵边缘为对称轴，将矩阵中的元素对称的填充到最外围</li>
-<li>replicate：重复填充，直接用边缘的像素值进行填充</li>
-<li>circular：循环填充，</li>
-</ul>
-<h1>实操</h1>
-<h2>pytorch实现</h2>
+<div class="markdown-body" id="postBody"><h1>一、pytorch实现</h1>
+<p>CNN的基础架构：<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/542c5a447403ab79065fd06a608416753a0b1bd69272b385f36acb20b10bfa1d/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f626c6f675f6d6967726174652f64643234666663316236376163326161363535336465643734313638626334372e706e67"><img src="https://camo.githubusercontent.com/542c5a447403ab79065fd06a608416753a0b1bd69272b385f36acb20b10bfa1d/68747470733a2f2f692d626c6f672e6373646e696d672e636e2f626c6f675f6d6967726174652f64643234666663316236376163326161363535336465643734313638626334372e706e67" alt="CNN基本结构" data-canonical-src="https://i-blog.csdnimg.cn/blog_migrate/dd24ffc1b67ac2aa6553ded74168bc47.png" style="max-width: 100%;"></a><br>
+其中主要的是卷积层与池化层的实现。</p>
 <pre class="notranslate"><code class="notranslate">class CNN(nn.Module):
     def __init__(self, num_classes):
         super(CNN, self).__init__()
@@ -126,30 +113,31 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </code></pre>
 <h2>输入输出</h2>
 <p><code class="notranslate">model_input: [batch_size,height,width,depth]</code></p>
-<h2>模型拆解</h2>
-<h3>1. 卷积核</h3>
+<h1>二、模型拆解</h1>
+<h2>1. 卷积核</h2>
 <pre class="notranslate"><code class="notranslate">torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros', device=None, dtype=None)
 </code></pre>
+<h3>输入输出</h3>
 <ul>
 <li>Input: $(N, C_{in}, H_{in}, W_{in})$ or $(C_{in}, H_{in}, W_{in})$
 </li>
 <li>Output: $(N, C_{out}, H_{out}, W_{out})$ or $(C_{out}, H_{out}, W_{out})$
 </li>
 </ul>
+<p>维度计算：</p>
 <p>$H_{out} = \left\lfloor\frac{H_{in}  + 2 \times \text{padding}[0] - \text{dilation}[0]<br>
 \times (\text{kernel_size}[0] - 1) - 1}{\text{stride}[0]} + 1\right\rfloor$</p>
 <p>$W_{out} = \left\lfloor\frac{W_{in}  + 2 \times \text{padding}[1] - \text{dilation}[1]<br>
 \times (\text{kernel_size}[1] - 1) - 1}{\text{stride}[1]} + 1\right\rfloor$</p>
-<p>计算公式：$<br>
-\text{out}(N_i, C_{\text{out}<em>j}) = \text{bias}(C</em>{\text{out}<em>j}) +<br>
+<h3>计算公式：</h3>
+<p>$\text{out}(N_i, C_{\text{out}<em>j}) = \text{bias}(C</em>{\text{out}<em>j}) +<br>
 \sum</em>{k = 0}^{C_{\text{in}} - 1} \text{weight}(C_{\text{out}_j}, k) \star \text{input}(N_i, k)$</p>
 <p>其中：</p>
 <p>$\star$ is the valid 2D <code class="notranslate">cross-correlation</code>_ operator</p>
 <p>$N$ 为 batch size</p>
 <p>$C$ 是 number_of_channels,</p>
 <p>$H$ is a height of input planes in pixels, and $W$ is width in pixels.</p>
-<p><code class="notranslate">output_size = ((input_size - dilation*(kernel_size-1) + 2* padding)-1)/stride + 1</code></p>
-<p>参数详解：</p>
+<h3>参数详解：</h3>
 <ul>
 <li>
 <p><code class="notranslate">kernel_size</code> 卷积核尺寸 <code class="notranslate">Tuple</code>&amp;<code class="notranslate">Int</code> 例：<code class="notranslate">（2，3）</code>代表卷积核为2*3，输入<code class="notranslate">3</code>代表卷积核为3*3</p>
@@ -166,6 +154,55 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <li>
 <p><code class="notranslate">padding_mode</code> padding的模式 <code class="notranslate">String{'zeros'（default）, 'reflect', 'replicate' or 'circular'} </code></p>
 </li>
+<li>
+<p><code class="notranslate">groups</code> 并排运行几个cov层，每有一个group则将输入与输出拆成一份，<code class="notranslate">in_channels</code>与<code class="notranslate">out_channels</code>必须被其整除。</p>
+</li>
+</ul>
+<h2>2.池化层</h2>
+<pre class="notranslate"><code class="notranslate">#最大池化
+torch.nn.MaxPool2d(kernel_size, stride=None, padding=0, dilation=1, return_indices=False, ceil_mode=False) 
+#均值池化
+torch.nn.AvgPool2d(kernel_size, stride=None, padding=0, ceil_mode=False, count_include_pad=True, divisor_override=None)
+</code></pre>
+<h3>输入输出</h3>
+<ul>
+<li>Input: $(N, C, H_{in}, W_{in})$ or $(C, H_{in}, W_{in})$
+</li>
+<li>Output: $(N, C, H_{out}, W_{out})$ or $(C, H_{out}, W_{out})$
+</li>
+</ul>
+<p>维度计算：</p>
+<p>$H_{out} = \left\lfloor\frac{H_{in} + 2 * \text{padding[0]} - \text{dilation[0]}<br>
+\times (\text{kernel_size[0]} - 1) - 1}{\text{stride[0]}} + 1\right\rfloor$</p>
+<p>$W_{out} = \left\lfloor\frac{W_{in} + 2 * \text{padding[1]} - \text{dilation[1]}<br>
+\times (\text{kernel_size[1]} - 1) - 1}{\text{stride[1]}} + 1\right\rfloor$</p>
+<h3>计算公式（最大池化为例）</h3>
+<p>$<br>
+\begin{aligned}<br>
+out(N_i, C_j, h, w) ={} &amp; \max_{m=0, \ldots, kH-1} \max_{n=0, \ldots, kW-1} \<br>
+&amp; \text{input}(N_i, C_j, \text{stride[0]} \times h + m,<br>
+\text{stride[1]} \times w + n)<br>
+\end{aligned}<br>
+$</p>
+<p>其中$K$表示$Kernel$</p>
+<h1>三、相关概念：</h1>
+<h2>padding 方法（padding to where）:</h2>
+<ul>
+<li>valid padding（有效填充）：完全不使用填充。</li>
+<li>half/same padding（半填充/相同填充）：保证输入和输出的feature map尺寸相同。</li>
+<li>full padding（全填充）：在卷积操作过程中，每个像素在每个方向上被访问的次数相同。</li>
+<li>arbitrary padding（任意填充）：人为设定填充。</li>
+</ul>
+<h2>padding mode (padding with what)：</h2>
+<ul>
+<li>zeros： 零填充，即用0进行填充</li>
+<li>reflect： 镜像填充，以矩阵边缘为对称轴，将矩阵中的元素对称的填充到最外围</li>
+<li>replicate：重复填充，直接用边缘的像素值进行填充</li>
+<li>circular：循环填充，</li>
+</ul>
+<h1>四、外部连接</h1>
+<ul>
+<li><a href="https://poloclub.github.io/cnn-explainer/" rel="nofollow">可交互的CNN网络可视化</a></li>
 </ul></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 

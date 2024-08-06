@@ -1,20 +1,7 @@
-# 原理
-
-padding
-- valid padding（有效填充）：完全不使用填充。
-- half/same padding（半填充/相同填充）：保证输入和输出的feature map尺寸相同。
-- full padding（全填充）：在卷积操作过程中，每个像素在每个方向上被访问的次数相同。
-- arbitrary padding（任意填充）：人为设定填充。
-
-paddingmode：
-- zeros： 零填充，即用0进行填充
-- reflect： 镜像填充，以矩阵边缘为对称轴，将矩阵中的元素对称的填充到最外围
-- replicate：重复填充，直接用边缘的像素值进行填充
-- circular：循环填充，
-
-
-# 实操
-## pytorch实现
+# 一、pytorch实现
+CNN的基础架构：
+![CNN基本结构](https://i-blog.csdnimg.cn/blog_migrate/dd24ffc1b67ac2aa6553ded74168bc47.png)
+其中主要的是卷积层与池化层的实现。
 
 ```
 class CNN(nn.Module):
@@ -51,13 +38,17 @@ class CNN(nn.Module):
 `model_input: [batch_size,height,width,depth]`
 
 
-## 模型拆解
-### 1. 卷积核
+# 二、模型拆解
+
+## 1. 卷积核
 ```
 torch.nn.Conv2d(in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, padding_mode='zeros', device=None, dtype=None)
 ```
+### 输入输出
 - Input: $(N, C_{in}, H_{in}, W_{in})$ or $(C_{in}, H_{in}, W_{in})$
 - Output: $(N, C_{out}, H_{out}, W_{out})$ or $(C_{out}, H_{out}, W_{out})$
+
+维度计算：
 
 $H_{out} = \left\lfloor\frac{H_{in}  + 2 \times \text{padding}[0] - \text{dilation}[0]
                         \times (\text{kernel\_size}[0] - 1) - 1}{\text{stride}[0]} + 1\right\rfloor$
@@ -65,8 +56,8 @@ $H_{out} = \left\lfloor\frac{H_{in}  + 2 \times \text{padding}[0] - \text{dilati
 $W_{out} = \left\lfloor\frac{W_{in}  + 2 \times \text{padding}[1] - \text{dilation}[1]
                         \times (\text{kernel\_size}[1] - 1) - 1}{\text{stride}[1]} + 1\right\rfloor$
 
-计算公式：$
-\text{out}(N_i, C_{\text{out}_j}) = \text{bias}(C_{\text{out}_j}) +
+### 计算公式：
+$\text{out}(N_i, C_{\text{out}_j}) = \text{bias}(C_{\text{out}_j}) +
         \sum_{k = 0}^{C_{\text{in}} - 1} \text{weight}(C_{\text{out}_j}, k) \star \text{input}(N_i, k)$
 
  其中：
@@ -80,14 +71,65 @@ $C$ 是 number_of_channels,
 $H$ is a height of input planes in pixels, and $W$ is width in pixels.
 
 
-`output_size = ((input_size - dilation*(kernel_size-1) + 2* padding)-1)/stride + 1`
 
-参数详解：
+### 参数详解：
 - `kernel_size` 卷积核尺寸 `Tuple`&`Int` 例：`（2，3）`代表卷积核为2\*3，输入`3`代表卷积核为3\*3
 - `stride` 步长 `Tuple`&`Int` 
 - `padding` 填充 `Tuple`&`Int` or `String {‘valid’, ‘same’}` 
 - `dilation` `Tuple`&`Int` kernel points的间距,[更多可视化](https://github.com/vdumoulin/conv_arithmetic/blob/master/README.md) ![dilation](https://github.com/vdumoulin/conv_arithmetic/raw/master/gif/dilation.gif) 
 
 - `padding_mode` padding的模式 `String{'zeros'（default）, 'reflect', 'replicate' or 'circular'} `
+- `groups` 并排运行几个cov层，每有一个group则将输入与输出拆成一份，`in_channels`与`out_channels`必须被其整除。
+
+## 2.池化层
+
+```
+#最大池化
+torch.nn.MaxPool2d(kernel_size, stride=None, padding=0, dilation=1, return_indices=False, ceil_mode=False) 
+#均值池化
+torch.nn.AvgPool2d(kernel_size, stride=None, padding=0, ceil_mode=False, count_include_pad=True, divisor_override=None)
+```
+### 输入输出
+- Input: $(N, C, H_{in}, W_{in})$ or $(C, H_{in}, W_{in})$
+- Output: $(N, C, H_{out}, W_{out})$ or $(C, H_{out}, W_{out})$
+
+维度计算：
+
+$H_{out} = \left\lfloor\frac{H_{in} + 2 * \text{padding[0]} - \text{dilation[0]}
+                    \times (\text{kernel\_size[0]} - 1) - 1}{\text{stride[0]}} + 1\right\rfloor$
+
+$W_{out} = \left\lfloor\frac{W_{in} + 2 * \text{padding[1]} - \text{dilation[1]}
+                    \times (\text{kernel\_size[1]} - 1) - 1}{\text{stride[1]}} + 1\right\rfloor$
+
+### 计算公式（最大池化为例）
+
+$
+        \begin{aligned}
+            out(N_i, C_j, h, w) ={} & \max_{m=0, \ldots, kH-1} \max_{n=0, \ldots, kW-1} \\
+                                    & \text{input}(N_i, C_j, \text{stride[0]} \times h + m,
+                                                   \text{stride[1]} \times w + n)
+        \end{aligned}
+$
+
+其中$K$表示$Kernel$
 
 
+
+# 三、相关概念：
+## padding 方法（padding to where）:
+- valid padding（有效填充）：完全不使用填充。
+- half/same padding（半填充/相同填充）：保证输入和输出的feature map尺寸相同。
+- full padding（全填充）：在卷积操作过程中，每个像素在每个方向上被访问的次数相同。
+- arbitrary padding（任意填充）：人为设定填充。
+## padding mode (padding with what)：
+- zeros： 零填充，即用0进行填充
+- reflect： 镜像填充，以矩阵边缘为对称轴，将矩阵中的元素对称的填充到最外围
+- replicate：重复填充，直接用边缘的像素值进行填充
+- circular：循环填充，
+
+
+
+
+
+# 四、外部连接
+- [可交互的CNN网络可视化](https://poloclub.github.io/cnn-explainer/)
