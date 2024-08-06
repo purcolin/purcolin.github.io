@@ -130,8 +130,7 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <p>$W_{out} = \left\lfloor\frac{W_{in}  + 2 \times \text{padding}[1] - \text{dilation}[1]<br>
 \times (\text{kernel_size}[1] - 1) - 1}{\text{stride}[1]} + 1\right\rfloor$</p>
 <h3>计算公式：</h3>
-<p>$\text{out}(N_i, C_{\text{out}<em>j}) = \text{bias}(C</em>{\text{out}<em>j}) +<br>
-\sum</em>{k = 0}^{C_{\text{in}} - 1} \text{weight}(C_{\text{out}_j}, k) \star \text{input}(N_i, k)$</p>
+<p>$\text{out}(N_i, C_{\text{out}<em>j}) = \text{bias}(C</em>{\text{out}<em>j}) + \sum</em>{k = 0}^{C_{\text{in}} - 1} \text{weight}(C_{\text{out}_j}, k) \star \text{input}(N_i, k)$</p>
 <p>其中：</p>
 <p>$\star$ is the valid 2D <code class="notranslate">cross-correlation</code>_ operator</p>
 <p>$N$ 为 batch size</p>
