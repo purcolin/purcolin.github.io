@@ -10,9 +10,99 @@
         let theme = localStorage.getItem("meek_theme") || "light";
         document.documentElement.setAttribute("data-color-mode", theme);
     </script>
-<meta name="description" content="">
+<meta name="description" content="# 激活函数
+## 1. ReLU
+```
+torch.nn.ReLU(inplace=False)
+```
+$\text{ReLU}(x) = (x)^+ = \max(0, x)$
+![alt text](https://pytorch.org/docs/stable/_images/ReLU.png)
+- inplace (bool) – can optionally do the operation in-place. Default: False
+
+## 2. SoftMax
+```
+torch.nn.Softmax(dim=None)
+```
+$\text{Softmax}(x_{i}) = \frac{\exp(x_i)}{\sum_j \exp(x_j)}$
+
+使某个维度下的所有值缩放到（0，1）且总和为1.
+## 3. Tanh
+```
+torch.nn.Tanh(*args, **kwargs)
+```
+${Tanh}(x) = \tanh(x) = \frac{\exp(x) - \exp(-x)} {\exp(x) + \exp(-x)}$
+![tanh](https://pytorch.org/docs/stable/_images/Tanh.png)
+## 4. Sigmoid
+```
+torch.nn.Sigmoid(*args, **kwargs)
+```
+${Sigmoid}(x) = \sigma(x) = \frac{1}{1 + \exp(-x)}$
+![Sigmoid](https://pytorch.org/docs/stable/_images/Sigmoid.png)
+
+# 全连接
+```
+torch.nn.Linear(in_features, out_features, bias=True, device=None, dtype=None)
+```
+
+- in_features (int) – size of each input sample
+
+- out_features (int) – size of each output sample
+
+- bias (bool) – If set to False, the layer will not learn an additive bias. Default: True
+
+### 输入输出
+
+- $Input Shape = (*,H_{in})$ 其中 $H_{in}$ = in_features 
+- $Output Shape = (*,H_{out})$ 其中 $H_{out}$ = out_features 
+
+。">
 <meta property="og:title" content="重识深度学习：激活函数与全连接">
-<meta property="og:description" content="">
+<meta property="og:description" content="# 激活函数
+## 1. ReLU
+```
+torch.nn.ReLU(inplace=False)
+```
+$\text{ReLU}(x) = (x)^+ = \max(0, x)$
+![alt text](https://pytorch.org/docs/stable/_images/ReLU.png)
+- inplace (bool) – can optionally do the operation in-place. Default: False
+
+## 2. SoftMax
+```
+torch.nn.Softmax(dim=None)
+```
+$\text{Softmax}(x_{i}) = \frac{\exp(x_i)}{\sum_j \exp(x_j)}$
+
+使某个维度下的所有值缩放到（0，1）且总和为1.
+## 3. Tanh
+```
+torch.nn.Tanh(*args, **kwargs)
+```
+${Tanh}(x) = \tanh(x) = \frac{\exp(x) - \exp(-x)} {\exp(x) + \exp(-x)}$
+![tanh](https://pytorch.org/docs/stable/_images/Tanh.png)
+## 4. Sigmoid
+```
+torch.nn.Sigmoid(*args, **kwargs)
+```
+${Sigmoid}(x) = \sigma(x) = \frac{1}{1 + \exp(-x)}$
+![Sigmoid](https://pytorch.org/docs/stable/_images/Sigmoid.png)
+
+# 全连接
+```
+torch.nn.Linear(in_features, out_features, bias=True, device=None, dtype=None)
+```
+
+- in_features (int) – size of each input sample
+
+- out_features (int) – size of each output sample
+
+- bias (bool) – If set to False, the layer will not learn an additive bias. Default: True
+
+### 输入输出
+
+- $Input Shape = (*,H_{in})$ 其中 $H_{in}$ = in_features 
+- $Output Shape = (*,H_{out})$ 其中 $H_{out}$ = out_features 
+
+。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://purcolin.github.io/post/zhong-shi-shen-du-xue-xi-%EF%BC%9A-ji-huo-han-shu-yu-quan-lian-jie.html">
 <meta property="og:image" content="https://github.githubassets.com/favicons/favicon.svg">
@@ -72,7 +162,51 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
 </div>
     <div id="content">
-<div class="markdown-body" id="postBody"></div>
+<div class="markdown-body" id="postBody"><h1>激活函数</h1>
+<h2>1. ReLU</h2>
+<pre class="notranslate"><code class="notranslate">torch.nn.ReLU(inplace=False)
+</code></pre>
+<p>$\text{ReLU}(x) = (x)^+ = \max(0, x)$<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/2044fadf51f524cb77b060333ad213824e611511809d7bd10df00b577a755b21/68747470733a2f2f7079746f7263682e6f72672f646f63732f737461626c652f5f696d616765732f52654c552e706e67"><img src="https://camo.githubusercontent.com/2044fadf51f524cb77b060333ad213824e611511809d7bd10df00b577a755b21/68747470733a2f2f7079746f7263682e6f72672f646f63732f737461626c652f5f696d616765732f52654c552e706e67" alt="alt text" data-canonical-src="https://pytorch.org/docs/stable/_images/ReLU.png" style="max-width: 100%;"></a></p>
+<ul>
+<li>inplace (bool) – can optionally do the operation in-place. Default: False</li>
+</ul>
+<h2>2. SoftMax</h2>
+<pre class="notranslate"><code class="notranslate">torch.nn.Softmax(dim=None)
+</code></pre>
+<p>$\text{Softmax}(x_{i}) = \frac{\exp(x_i)}{\sum_j \exp(x_j)}$</p>
+<p>使某个维度下的所有值缩放到（0，1）且总和为1.</p>
+<h2>3. Tanh</h2>
+<pre class="notranslate"><code class="notranslate">torch.nn.Tanh(*args, **kwargs)
+</code></pre>
+<p>${Tanh}(x) = \tanh(x) = \frac{\exp(x) - \exp(-x)} {\exp(x) + \exp(-x)}$<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/8cc82a4be4ede2b233508a454bf8b62e54e2ef611fe9218a46296e556da39ca3/68747470733a2f2f7079746f7263682e6f72672f646f63732f737461626c652f5f696d616765732f54616e682e706e67"><img src="https://camo.githubusercontent.com/8cc82a4be4ede2b233508a454bf8b62e54e2ef611fe9218a46296e556da39ca3/68747470733a2f2f7079746f7263682e6f72672f646f63732f737461626c652f5f696d616765732f54616e682e706e67" alt="tanh" data-canonical-src="https://pytorch.org/docs/stable/_images/Tanh.png" style="max-width: 100%;"></a></p>
+<h2>4. Sigmoid</h2>
+<pre class="notranslate"><code class="notranslate">torch.nn.Sigmoid(*args, **kwargs)
+</code></pre>
+<p>${Sigmoid}(x) = \sigma(x) = \frac{1}{1 + \exp(-x)}$<br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/94fbfd1831b11f5915280066034304b1fca40c72b5f16ff2d331dfb5e3e997af/68747470733a2f2f7079746f7263682e6f72672f646f63732f737461626c652f5f696d616765732f5369676d6f69642e706e67"><img src="https://camo.githubusercontent.com/94fbfd1831b11f5915280066034304b1fca40c72b5f16ff2d331dfb5e3e997af/68747470733a2f2f7079746f7263682e6f72672f646f63732f737461626c652f5f696d616765732f5369676d6f69642e706e67" alt="Sigmoid" data-canonical-src="https://pytorch.org/docs/stable/_images/Sigmoid.png" style="max-width: 100%;"></a></p>
+<h1>全连接</h1>
+<pre class="notranslate"><code class="notranslate">torch.nn.Linear(in_features, out_features, bias=True, device=None, dtype=None)
+</code></pre>
+<ul>
+<li>
+<p>in_features (int) – size of each input sample</p>
+</li>
+<li>
+<p>out_features (int) – size of each output sample</p>
+</li>
+<li>
+<p>bias (bool) – If set to False, the layer will not learn an additive bias. Default: True</p>
+</li>
+</ul>
+<h3>输入输出</h3>
+<ul>
+<li>
+$Input Shape = (*,H_{in})$ 其中 $H_{in}$ = in_features</li>
+<li>
+$Output Shape = (*,H_{out})$ 其中 $H_{out}$ = out_features</li>
+</ul></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
@@ -170,6 +304,6 @@ function iFrameLoading(){
     }
 }
 </script>
-
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 </html>
