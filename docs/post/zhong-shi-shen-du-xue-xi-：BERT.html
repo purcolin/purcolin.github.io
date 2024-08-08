@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://github.githubassets.com/favicons/favicon.svg"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## *本文为bert相关实操知识，模型结构等放到tranformer里讲。">
+<meta property="og:title" content="重识深度学习：BERT">
+<meta property="og:description" content="## *本文为bert相关实操知识，模型结构等放到tranformer里讲。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://purcolin.github.io/post/zhong-shi-shen-du-xue-xi-%EF%BC%9ABERT.html">
+<meta property="og:image" content="https://github.githubassets.com/favicons/favicon.svg">
+<title>重识深度学习：BERT</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">重识深度学习：BERT</h1>
+<div class="title-right">
+    <a href="https://purcolin.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/purcolin/purcolin.github.io/issues/9" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2><em>本文为bert相关实操知识，模型结构等放到tranformer里讲。</em></h2>
+<h1>模型初始化</h1>
+<p><a href="https://huggingface.co/docs/transformers/model_doc/bert#transformers.BertModel" rel="nofollow">官方文档</a>&amp;<a href="https://github.com/huggingface/transformers/blob/v4.43.4/src/transformers/models/bert/modeling_bert.py#L952">官方api</a>&amp;<a href="https://github.com/huggingface/transformers/blob/v4.43.4/src/transformers/models/bert/configuration_bert.py#L29">config的api</a></p>
+<pre class="notranslate"><code class="notranslate">class transformers.BertModel(config : BertConfig , add_pooling_layer = True)
+</code></pre>
+<p>其中config为类<code class="notranslate">transformers.BertConfig</code><br>
+主要的参数如下：</p>
+<ul>
+<li><strong>vocab_size</strong> <em>(int, optional, defaults to 30522)</em> — BERT 模型的词表大小。定义了调用 BertModel 或 TFBertModel 时传递的 <code class="notranslate">inputs_ids</code> 可以表示的不同 token 的数量。</li>
+<li><strong>hidden_size</strong> <em>(int, optional, defaults to 768)</em> — encoder层和池化层的维度大小。</li>
+<li><strong>num_hidden_layers</strong> <em>(int, optional, defaults to 12)</em> — Transformer encoder中的隐藏层数量。</li>
+<li><strong>num_attention_heads</strong> <em>(int, optional, defaults to 12)</em> — Transformer encoder中每个注意力层的注意力头数量。</li>
+<li><strong>intermediate_size</strong> <em>(int, optional, defaults to 3072)</em> — Transformer encoder中“中间层”（常称为前馈层）的维度大小。</li>
+<li><strong>hidden_act</strong> <em>(str or Callable, optional, defaults to "gelu")</em> — 编码器和池化层中的非线性激活函数（函数或字符串）。如果是字符串，可以选 "gelu"、"relu"、"silu" 和 "gelu_new"。</li>
+<li><strong>hidden_dropout_prob</strong> <em>(float, optional, defaults to 0.1)</em> — embedding、encoder和poller中所有全连接层的 dropout 概率。</li>
+<li><strong>attention_probs_dropout_prob</strong> <em>(float, optional, defaults to 0.1)</em> — 注意力概率的 dropout 比例。</li>
+<li><strong>max_position_embeddings</strong> <em>(int, optional, defaults to 512)</em> — 该模型可能使用的最大序列长度。通常设置为一个较大的数值以防万一（例如，512、1024 或 2048）。</li>
+<li><strong>type_vocab_size</strong> <em>(int, optional, defaults to 2)</em> — 调用 BertModel 或 TFBertModel 时传递的 token_type_ids 的词汇表大小。</li>
+<li><strong>initializer_range</strong> <em>(float, optional, defaults to 0.02)</em> — 用于初始化所有权重矩阵的 <code class="notranslate">truncated_normal_initializer</code> 的标准差。</li>
+<li><strong>layer_norm_eps</strong> <em>(float, optional, defaults to 1e-12)</em> — layer normalization层使用的 epsilon 值。</li>
+<li><strong>position_embedding_type</strong> <em>(str, optional, defaults to "absolute")</em> — position embedding的类型。选择 "absolute"、"relative_key"、"relative_key_query" 之一。对于positional embedding，使用 "absolute"。</li>
+</ul>
+<blockquote>
+<p>有关 "relative_key" 的更多信息，请参见《Self-Attention with Relative Position Representations (Shaw et al.)》。有关 "relative_key_query" 的更多信息，请参见《Improve Transformer Models with Better Relative Position Embeddings (Huang et al.)》中的方法 4。</p>
+</blockquote>
+<ul>
+<li><strong>is_decoder</strong> <em>(bool, optional, defaults to False)</em> — 模型是否用作解码器。如果为 False，模型用作编码器。</li>
+<li><strong>use_cache</strong> <em>(bool, optional, defaults to True)</em> — 模型是否应返回上一个键/值的注意力（并非所有模型都使用）。仅在 <code class="notranslate">config.is_decoder=True</code> 时相关。</li>
+<li><strong>classifier_dropout</strong> <em>(float, optional)</em> — 分类头的 dropout 比例。</li>
+</ul>
+<h1>模型输出</h1>
+<p>BertModel的forward()类覆写了__call__()方法，因此调用BertModel(**inputs)即会返回输出。</p>
+<p>输入：</p>
+<ul>
+<li>input_ids: Optional[torch.Tensor] = None,</li>
+<li>attention_mask: Optional[torch.Tensor] = None,</li>
+<li>token_type_ids: Optional[torch.Tensor] = None,</li>
+<li>position_ids: Optional[torch.Tensor] = None,</li>
+<li>head_mask: Optional[torch.Tensor] = None,</li>
+<li>inputs_embeds: Optional[torch.Tensor] = None,</li>
+<li>encoder_hidden_states: Optional[torch.Tensor] = None,</li>
+<li>encoder_attention_mask: Optional[torch.Tensor] = None,</li>
+<li>past_key_values: Optional[List[torch.FloatTensor]] = None,</li>
+<li>use_cache: Optional[bool] = None,</li>
+<li>output_attentions: Optional[bool] = None,</li>
+<li>output_hidden_states: Optional[bool] = None,</li>
+<li>return_dict: Optional[bool] = None,</li>
+</ul>
+<h2>如果return_dict=True</h2>
+<p>返回一个<a href="https://huggingface.co/docs/transformers/main_classes/output#transformers.modeling_outputs.BaseModelOutputWithPoolingAndCrossAttentions" rel="nofollow">BaseModelOutputWithPoolingAndCrossAttentions</a>*</p>
+<ul>
+<li>last_hidden_state (<code class="notranslate">torch.FloatTensor</code> of shape <code class="notranslate">(batch_size, sequence_length, hidden_size)</code>):Sequence of hidden-states at the output of the last layer of the model.</li>
+<li>pooler_output (<code class="notranslate">torch.FloatTensor</code> of shape <code class="notranslate">(batch_size, hidden_size)</code>):Last layer hidden-state of the first token of the sequence (classification token) after further processing through the layers used for the auxiliary pretraining task. E.g. for BERT-family of models, this returns the classification token after processing through a linear layer and a tanh activation function. The linear layer weights are trained from the next sentence prediction (classification) objective during pretraining.</li>
+<li>hidden_states (<code class="notranslate">tuple(torch.FloatTensor)</code>, <em>optional</em>, returned when <code class="notranslate">output_hidden_states=True</code> is passed or when <code class="notranslate">config.output_hidden_states=True</code>):<br>
+Tuple of <code class="notranslate">torch.FloatTensor</code> (one for the output of the embeddings, if the model has an embedding layer, +<br>
+one for the output of each layer) of shape <code class="notranslate">(batch_size, sequence_length, hidden_size)</code>.<br>
+Hidden-states of the model at the output of each layer plus the optional initial embedding outputs.</li>
+<li>attentions (<code class="notranslate">tuple(torch.FloatTensor)</code>, <em>optional</em>, returned when <code class="notranslate">output_attentions=True</code> is passed or when <code class="notranslate">config.output_attentions=True</code>):<br>
+Tuple of <code class="notranslate">torch.FloatTensor</code> (one for each layer) of shape <code class="notranslate">(batch_size, num_heads, sequence_length, sequence_length)</code>.Attentions weights after the attention softmax, used to compute the weighted average in the self-attention<br>
+heads.</li>
+<li>cross_attentions (<code class="notranslate">tuple(torch.FloatTensor)</code>, <em>optional</em>, returned when <code class="notranslate">output_attentions=True</code> and <code class="notranslate">config.add_cross_attention=True</code> is passed or when <code class="notranslate">config.output_attentions=True</code>):<br>
+Tuple of <code class="notranslate">torch.FloatTensor</code> (one for each layer) of shape <code class="notranslate">(batch_size, num_heads, sequence_length, sequence_length)</code>. Attentions weights of the decoder's cross-attention layer, after the attention softmax, used to compute the<br>
+weighted average in the cross-attention heads.</li>
+<li>past_key_values (<code class="notranslate">tuple(tuple(torch.FloatTensor))</code>, <em>optional</em>, returned when <code class="notranslate">use_cache=True</code> is passed or when <code class="notranslate">config.use_cache=True</code>):<br>
+Tuple of <code class="notranslate">tuple(torch.FloatTensor)</code> of length <code class="notranslate">config.n_layers</code>, with each tuple having 2 tensors of shape<br>
+<code class="notranslate">(batch_size, num_heads, sequence_length, embed_size_per_head)</code> and optionally if<br>
+<code class="notranslate">config.is_encoder_decoder=True</code> 2 additional tensors of shape <code class="notranslate">(batch_size, num_heads, encoder_sequence_length, embed_size_per_head)</code>.<br>
+Contains pre-computed hidden-states (key and values in the self-attention blocks and optionally if<br>
+<code class="notranslate">config.is_encoder_decoder=True</code> in the cross-attention blocks) that can be used (see <code class="notranslate">past_key_values</code><br>
+input) to speed up sequential decoding.</li>
+</ul>
+<h2>如果return_dict=False</h2>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>位置</th>
+<th>描述</th>
+<th>shape</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>output[0]</td>
+<td>最后一层的隐藏状态</td>
+<td>（batch_size, sequence_length, hidden_size)</td>
+</tr>
+<tr>
+<td>output[1]</td>
+<td>第一个token即（cls）最后一层的隐藏状态</td>
+<td>(batch_size, hidden_size)</td>
+</tr>
+<tr>
+<td>output[2]</td>
+<td>需要指定 output_hidden_states = True， 包含所有隐藏状态，第一个元素是embedding, 其余元素是各层的输出</td>
+<td>(batch_size, sequence_length, hidden_size)</td>
+</tr>
+<tr>
+<td>output[3]</td>
+<td>需要指定output_attentions=True，包含每一层的注意力权重，用于计算self-attention heads的加权平均值</td>
+<td>(batch_size, layer_nums, sequence_length, sequence_legth)</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://purcolin.github.io">Blog Title</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","purcolin/purcolin.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+</script>
+
+
+</html>
