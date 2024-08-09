@@ -10,15 +10,19 @@
         let theme = localStorage.getItem("meek_theme") || "light";
         document.documentElement.setAttribute("data-color-mode", theme);
     </script>
-<meta name="description" content="
-## 数据准备
+<meta name="description" content="## Dropout
+```
+torch.nn.Dropout(p=0.5, inplace=False)
+```
 
-pytorch能够通过`DataLoader`去迭代输出`Dataset`中的每条batch数据，解耦代码提高可读性与更好的模块化。">
+功能：Dropout是一种**正则化**手段，能够减少神经元对上层神经元的依赖，一般放在fc层后防止过拟合、提高模型的泛化能力。">
 <meta property="og:title" content="重识深度学习：torch.nn常用类">
-<meta property="og:description" content="
-## 数据准备
+<meta property="og:description" content="## Dropout
+```
+torch.nn.Dropout(p=0.5, inplace=False)
+```
 
-pytorch能够通过`DataLoader`去迭代输出`Dataset`中的每条batch数据，解耦代码提高可读性与更好的模块化。">
+功能：Dropout是一种**正则化**手段，能够减少神经元对上层神经元的依赖，一般放在fc层后防止过拟合、提高模型的泛化能力。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://purcolin.github.io/post/zhong-shi-shen-du-xue-xi-%EF%BC%9Atorch.nn-chang-yong-lei.html">
 <meta property="og:image" content="https://github.githubassets.com/favicons/favicon.svg">
@@ -78,45 +82,45 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
 </div>
     <div id="content">
-<div class="markdown-body" id="postBody"><h2>数据准备</h2>
-<p>pytorch能够通过<code class="notranslate">DataLoader</code>去迭代输出<code class="notranslate">Dataset</code>中的每条batch数据，解耦代码提高可读性与更好的模块化。</p>
-<h3>Dataset</h3>
-<p>自定义<code class="notranslate">Dataset</code>类需要实现至少如下三个函数：<code class="notranslate">__init__，__len__,__getitem__</code>，基础的实现方式如下所示：</p>
-<pre class="notranslate"><code class="notranslate">class CustomDataset(Dataset):
-    def __init__(self, data_path):
-        self.data = pd.read_csv(data_path)
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        input = self.data['input']
-        label = self.data['label']
-        return input, label
+<div class="markdown-body" id="postBody"><h2>Dropout</h2>
+<pre class="notranslate"><code class="notranslate">torch.nn.Dropout(p=0.5, inplace=False)
 </code></pre>
-<h3>DataLoader</h3>
-<p><code class="notranslate">DataLoader</code>能够方便的读取与迭代数据，  其创建方式如下：</p>
-<pre class="notranslate"><code class="notranslate">torch.utils.data.DataLoader(dataset,batch_size=1,shuffle=None, sampler=None, batch_sampler=None, num_workers=0, collate_fn=None, pin_memory=False, drop_last=False, timeout=0, worker_init_fn=None, multiprocessing_context=None, generator=None, *, prefetch_factor=None, persistent_workers=False, pin_memory_device='')
+<p>功能：Dropout是一种<strong>正则化</strong>手段，能够减少神经元对上层神经元的依赖，一般放在fc层后防止过拟合、提高模型的泛化能力。<br>
+只会在model.train()时激活，在model.eval()时失效。</p>
+<p>输入：</p>
+<ul>
+<li>p：元素归零的概率</li>
+<li>inplace：是否改变输入数据，如果设置为True，则会直接修改输入数据；如果设置为False，则不对输入数据做修改</li>
+</ul>
+<h2>Linear</h2>
+<pre class="notranslate"><code class="notranslate">torch.nn.Linear(in_features, out_features, bias=True, device=None, dtype=None)
 </code></pre>
-<ol>
-<li>dataset (必需): 用于加载数据的数据集，通常是torch.utils.data.Dataset的子类实例。</li>
-<li>batch_size (可选): 每个批次的数据样本数。默认值为1。</li>
-<li>shuffle (可选): 是否在每个周期开始时打乱数据。默认为False。</li>
-<li>sampler (可选): 定义从数据集中抽取样本的策略。如果指定，则忽略shuffle参数。</li>
-<li>batch_sampler (可选): 与sampler类似，但一次返回一个批次的索引。不能与batch_size、shuffle和sampler同时使用。</li>
-<li>num_workers (可选): 用于数据加载的子进程数量。默认为0，意味着数据将在主进程中加载。</li>
-<li>collate_fn (可选): 如何将多个数据样本整合成一个批次。通常不需要指定。</li>
-<li>drop_last (可选): 如果数据集大小不能被批次大小整除，是否丢弃最后一个不完整的批次。默认为False。</li>
-</ol>
-<p>在训练时，直接迭代DataLoader，每次迭代的输出即为__getitem__的输出（本例即input与label）</p>
-<pre class="notranslate"><code class="notranslate">train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-for inputs, labels in train_loader:
-    do_train()
+<p>功能：为输入的特征向量做线性变换<br>
+$y = xW^T + b$</p>
+<ul>
+<li>w的shape: $(\text{out_features}, \text{in_features})$
+</li>
+</ul>
+<p>输入：</p>
+<ul>
+<li>in_features: size of each input sample, shape: $(*, H_{in})$,$H_{in} = \text{in_features}$</li>
+<li>out_features: size of each output sample,shape:$(*, H_{out})$,$H_{out} = \text{out_features}$</li>
+<li>bias: If set to <code class="notranslate">False</code>, the layer will not learn an additive bias.<br>
+Default: <code class="notranslate">True</code>
+</li>
+</ul>
+<h2>余弦相似度</h2>
+<pre class="notranslate"><code class="notranslate">torch.nn.CosineSimilarity(dim=1, eps=1e-08)
 </code></pre>
-<h2>模型、损失与优化器加载</h2>
-<p>模型直接加载定义好的模型即可。</p>
-<p>损失函数与优化器是编译一个神经网络模型必备的两个参数。<br>
-损失函数是指用于计算标签值和预测值之间差异的函数，在机器学习过程中，有多种损失函数可供选择，典型的有距离向量，绝对值向量等。</p></div>
+<p>$\text{similarity} = \dfrac{x_1 \cdot x_2}{\max(\Vert x_1 \Vert _2 \cdot \Vert x_2 \Vert _2, \epsilon)}.$</p>
+<p>即：$\text{cosine_similarity} = cos(\theta) = \dfrac{A \cdot B}{\Vert A \Vert  \Vert B\Vert}$</p>
+<p>参数：</p>
+<ul>
+<li>dim：相似度计算的维度</li>
+<li>eps：防止除以零所设的下线。</li>
+</ul>
+<p>输入：$x_1:(\ast_1, D, \ast_2) ; x_2:(\ast_1, D, \ast_2)$</p>
+<p>输出：$(\ast_1, \ast_2)$ 取值为$(-1,1)$</p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
@@ -214,6 +218,6 @@ function iFrameLoading(){
     }
 }
 </script>
-
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 </html>
