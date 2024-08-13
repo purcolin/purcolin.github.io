@@ -17,7 +17,7 @@
 <meta property="og:url" content="https://purcolin.github.io/post/zhong-shi-shen-du-xue-xi-%EF%BC%9ABERT.html">
 <meta property="og:image" content="https://github.githubassets.com/favicons/favicon.svg">
 <title>重识深度学习：BERT</title>
-
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
 
 
 </head>
@@ -86,6 +86,7 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <div class="markdown-body" id="postBody"><h2><em>本文为bert相关实操知识，模型结构等放到tranformer里讲。</em></h2>
 <h1>模型初始化</h1>
 <p><a href="https://huggingface.co/docs/transformers/model_doc/bert#transformers.BertModel" rel="nofollow">官方文档</a>&amp;<a href="https://github.com/huggingface/transformers/blob/v4.43.4/src/transformers/models/bert/modeling_bert.py#L952">官方api</a>&amp;<a href="https://github.com/huggingface/transformers/blob/v4.43.4/src/transformers/models/bert/configuration_bert.py#L29">config的api</a></p>
+<p><em>除此之外，transformers提供了诸多bertforxxxx系列模型<a href="https://blog.csdn.net/qq_43592352/article/details/136049507" rel="nofollow">https://blog.csdn.net/qq_43592352/article/details/136049507</a></em></p>
 <pre class="notranslate"><code class="notranslate">class transformers.BertModel(config : BertConfig , add_pooling_layer = True)
 </code></pre>
 <p>其中config为类<code class="notranslate">transformers.BertConfig</code><br>
@@ -185,7 +186,101 @@ input) to speed up sequential decoding.</li>
 <td>(batch_size, layer_nums, sequence_length, sequence_legth)</td>
 </tr>
 </tbody>
-</table></markdown-accessiblity-table></div>
+</table></markdown-accessiblity-table>
+<h1>BertTokenizer</h1>
+<div class="highlight highlight-source-python"><pre class="notranslate">(<span class="pl-s1">vocab_file</span>,<span class="pl-s1">do_lower_case</span><span class="pl-c1">=</span><span class="pl-c1">True</span>,
+        <span class="pl-s1">do_basic_tokenize</span><span class="pl-c1">=</span><span class="pl-c1">True</span>,
+        <span class="pl-s1">never_split</span><span class="pl-c1">=</span><span class="pl-c1">None</span>,
+        <span class="pl-s1">unk_token</span><span class="pl-c1">=</span><span class="pl-s">"[UNK]"</span>,
+        <span class="pl-s1">sep_token</span><span class="pl-c1">=</span><span class="pl-s">"[SEP]"</span>,
+        <span class="pl-s1">pad_token</span><span class="pl-c1">=</span><span class="pl-s">"[PAD]"</span>,
+        <span class="pl-s1">cls_token</span><span class="pl-c1">=</span><span class="pl-s">"[CLS]"</span>,
+        <span class="pl-s1">mask_token</span><span class="pl-c1">=</span><span class="pl-s">"[MASK]"</span>,
+        <span class="pl-s1">tokenize_chinese_chars</span><span class="pl-c1">=</span><span class="pl-c1">True</span>,
+        <span class="pl-s1">strip_accents</span><span class="pl-c1">=</span><span class="pl-c1">None</span>,
+        <span class="pl-c1">**</span><span class="pl-s1">kwargs</span>,
+    )</pre></div>
+<ul>
+<li>
+<p>vocab_file (<code class="notranslate">str</code>): File containing the vocabulary.</p>
+</li>
+<li>
+<p>do_lower_case (<code class="notranslate">bool</code>, <em>optional</em>, defaults to <code class="notranslate">True</code>):<br>
+Whether or not to lowercase the input when tokenizing.</p>
+</li>
+<li>
+<p>do_basic_tokenize (<code class="notranslate">bool</code>, <em>optional</em>, defaults to <code class="notranslate">True</code>):<br>
+Whether or not to do basic tokenization before WordPiece.</p>
+</li>
+<li>
+<p>never_split (<code class="notranslate">Iterable</code>, <em>optional</em>):<br>
+Collection of tokens which will never be split during tokenization. Only has an effect when<br>
+<code class="notranslate">do_basic_tokenize=True</code></p>
+</li>
+<li>
+<p>unk_token (<code class="notranslate">str</code>, <em>optional</em>, defaults to <code class="notranslate">"[UNK]"</code>):<br>
+The unknown token. A token that is not in the vocabulary cannot be converted to an ID and is set to be this<br>
+token instead.</p>
+</li>
+<li>
+<p>sep_token (<code class="notranslate">str</code>, <em>optional</em>, defaults to <code class="notranslate">"[SEP]"</code>):<br>
+The separator token, which is used when building a sequence from multiple sequences, e.g. two sequences for<br>
+sequence classification or for a text and a question for question answering. It is also used as the last<br>
+token of a sequence built with special tokens.</p>
+</li>
+<li>
+<p>pad_token (<code class="notranslate">str</code>, <em>optional</em>, defaults to <code class="notranslate">"[PAD]"</code>):<br>
+The token used for padding, for example when batching sequences of different lengths.</p>
+</li>
+<li>
+<p>cls_token (<code class="notranslate">str</code>, <em>optional</em>, defaults to <code class="notranslate">"[CLS]"</code>):<br>
+The classifier token which is used when doing sequence classification (classification of the whole sequence<br>
+instead of per-token classification). It is the first token of the sequence when built with special tokens.</p>
+</li>
+<li>
+<p>mask_token (<code class="notranslate">str</code>, <em>optional</em>, defaults to <code class="notranslate">"[MASK]"</code>):<br>
+The token used for masking values. This is the token used when training this model with masked language<br>
+modeling. This is the token which the model will try to predict.</p>
+</li>
+<li>
+<p>tokenize_chinese_chars (<code class="notranslate">bool</code>, <em>optional</em>, defaults to <code class="notranslate">True</code>):<br>
+Whether or not to tokenize Chinese characters.</p>
+<p>This should likely be deactivated for Japanese (see this<br>
+<a href="https://github.com/huggingface/transformers/issues/328" data-hovercard-type="issue" data-hovercard-url="/huggingface/transformers/issues/328/hovercard">issue</a>).</p>
+</li>
+<li>
+<p>strip_accents (<code class="notranslate">bool</code>, <em>optional</em>):<br>
+Whether or not to strip all accents. If this option is not specified, then it will be determined by the<br>
+value for <code class="notranslate">lowercase</code> (as in the original BERT).</p>
+</li>
+</ul>
+<p>__call__方法：</p>
+<div class="highlight highlight-source-python"><pre class="notranslate">    <span class="pl-k">def</span> <span class="pl-s1">__call__</span>(
+        <span class="pl-s1">self</span>,
+        <span class="pl-s1">text</span>: <span class="pl-v">Union</span>[<span class="pl-v">TextInput</span>, <span class="pl-v">PreTokenizedInput</span>, <span class="pl-v">List</span>[<span class="pl-v">TextInput</span>], <span class="pl-v">List</span>[<span class="pl-v">PreTokenizedInput</span>]] <span class="pl-c1">=</span> <span class="pl-c1">None</span>,
+        <span class="pl-s1">text_pair</span>: <span class="pl-v">Optional</span>[<span class="pl-v">Union</span>[<span class="pl-v">TextInput</span>, <span class="pl-v">PreTokenizedInput</span>, <span class="pl-v">List</span>[<span class="pl-v">TextInput</span>], <span class="pl-v">List</span>[<span class="pl-v">PreTokenizedInput</span>]]] <span class="pl-c1">=</span> <span class="pl-c1">None</span>,
+        <span class="pl-s1">text_target</span>: <span class="pl-v">Union</span>[<span class="pl-v">TextInput</span>, <span class="pl-v">PreTokenizedInput</span>, <span class="pl-v">List</span>[<span class="pl-v">TextInput</span>], <span class="pl-v">List</span>[<span class="pl-v">PreTokenizedInput</span>]] <span class="pl-c1">=</span> <span class="pl-c1">None</span>,
+        <span class="pl-s1">text_pair_target</span>: <span class="pl-v">Optional</span>[
+            <span class="pl-v">Union</span>[<span class="pl-v">TextInput</span>, <span class="pl-v">PreTokenizedInput</span>, <span class="pl-v">List</span>[<span class="pl-v">TextInput</span>], <span class="pl-v">List</span>[<span class="pl-v">PreTokenizedInput</span>]]
+        ] <span class="pl-c1">=</span> <span class="pl-c1">None</span>,
+        <span class="pl-s1">add_special_tokens</span>: <span class="pl-s1">bool</span> <span class="pl-c1">=</span> <span class="pl-c1">True</span>,
+        <span class="pl-s1">padding</span>: <span class="pl-v">Union</span>[<span class="pl-s1">bool</span>, <span class="pl-s1">str</span>, <span class="pl-v">PaddingStrategy</span>] <span class="pl-c1">=</span> <span class="pl-c1">False</span>,
+        <span class="pl-s1">truncation</span>: <span class="pl-v">Union</span>[<span class="pl-s1">bool</span>, <span class="pl-s1">str</span>, <span class="pl-v">TruncationStrategy</span>] <span class="pl-c1">=</span> <span class="pl-c1">None</span>,
+        <span class="pl-s1">max_length</span>: <span class="pl-v">Optional</span>[<span class="pl-s1">int</span>] <span class="pl-c1">=</span> <span class="pl-c1">None</span>,
+        <span class="pl-s1">stride</span>: <span class="pl-s1">int</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>,
+        <span class="pl-s1">is_split_into_words</span>: <span class="pl-s1">bool</span> <span class="pl-c1">=</span> <span class="pl-c1">False</span>,
+        <span class="pl-s1">pad_to_multiple_of</span>: <span class="pl-v">Optional</span>[<span class="pl-s1">int</span>] <span class="pl-c1">=</span> <span class="pl-c1">None</span>,
+        <span class="pl-s1">return_tensors</span>: <span class="pl-v">Optional</span>[<span class="pl-v">Union</span>[<span class="pl-s1">str</span>, <span class="pl-v">TensorType</span>]] <span class="pl-c1">=</span> <span class="pl-c1">None</span>,
+        <span class="pl-s1">return_token_type_ids</span>: <span class="pl-v">Optional</span>[<span class="pl-s1">bool</span>] <span class="pl-c1">=</span> <span class="pl-c1">None</span>,
+        <span class="pl-s1">return_attention_mask</span>: <span class="pl-v">Optional</span>[<span class="pl-s1">bool</span>] <span class="pl-c1">=</span> <span class="pl-c1">None</span>,
+        <span class="pl-s1">return_overflowing_tokens</span>: <span class="pl-s1">bool</span> <span class="pl-c1">=</span> <span class="pl-c1">False</span>,
+        <span class="pl-s1">return_special_tokens_mask</span>: <span class="pl-s1">bool</span> <span class="pl-c1">=</span> <span class="pl-c1">False</span>,
+        <span class="pl-s1">return_offsets_mapping</span>: <span class="pl-s1">bool</span> <span class="pl-c1">=</span> <span class="pl-c1">False</span>,
+        <span class="pl-s1">return_length</span>: <span class="pl-s1">bool</span> <span class="pl-c1">=</span> <span class="pl-c1">False</span>,
+        <span class="pl-s1">verbose</span>: <span class="pl-s1">bool</span> <span class="pl-c1">=</span> <span class="pl-c1">True</span>,
+        <span class="pl-c1">**</span><span class="pl-s1">kwargs</span>,</pre></div>
+<p>参数解释：<br>
+<a href="https://huggingface.co/docs/transformers/main_classes/tokenizer" rel="nofollow">https://huggingface.co/docs/transformers/main_classes/tokenizer</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>

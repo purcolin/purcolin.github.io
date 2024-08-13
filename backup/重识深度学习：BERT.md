@@ -4,6 +4,8 @@
 
 [官方文档](https://huggingface.co/docs/transformers/model_doc/bert#transformers.BertModel)&[官方api](https://github.com/huggingface/transformers/blob/v4.43.4/src/transformers/models/bert/modeling_bert.py#L952)&[config的api](https://github.com/huggingface/transformers/blob/v4.43.4/src/transformers/models/bert/configuration_bert.py#L29)
 
+*除此之外，transformers提供了诸多bertforxxxx系列模型https://blog.csdn.net/qq_43592352/article/details/136049507*
+
 ```
 class transformers.BertModel(config : BertConfig , add_pooling_layer = True)
 ```
@@ -80,3 +82,83 @@ BertModel的forward()类覆写了__call__()方法，因此调用BertModel(**inpu
 |output[1]| 第一个token即（cls）最后一层的隐藏状态 |(batch_size, hidden_size)| 
 |output[2]| 需要指定 output_hidden_states = True， 包含所有隐藏状态，第一个元素是embedding, 其余元素是各层的输出 |(batch_size, sequence_length, hidden_size)
 |output[3]| 需要指定output_attentions=True，包含每一层的注意力权重，用于计算self-attention heads的加权平均值|(batch_size, layer_nums, sequence_length, sequence_legth)
+
+
+# BertTokenizer
+```py
+(vocab_file,do_lower_case=True,
+        do_basic_tokenize=True,
+        never_split=None,
+        unk_token="[UNK]",
+        sep_token="[SEP]",
+        pad_token="[PAD]",
+        cls_token="[CLS]",
+        mask_token="[MASK]",
+        tokenize_chinese_chars=True,
+        strip_accents=None,
+        **kwargs,
+    )
+```
+- vocab_file (`str`): File containing the vocabulary.
+- do_lower_case (`bool`, *optional*, defaults to `True`):
+    Whether or not to lowercase the input when tokenizing.
+- do_basic_tokenize (`bool`, *optional*, defaults to `True`):
+    Whether or not to do basic tokenization before WordPiece.
+- never_split (`Iterable`, *optional*):
+    Collection of tokens which will never be split during tokenization. Only has an effect when
+    `do_basic_tokenize=True`
+- unk_token (`str`, *optional*, defaults to `"[UNK]"`):
+    The unknown token. A token that is not in the vocabulary cannot be converted to an ID and is set to be this
+    token instead.
+- sep_token (`str`, *optional*, defaults to `"[SEP]"`):
+    The separator token, which is used when building a sequence from multiple sequences, e.g. two sequences for
+    sequence classification or for a text and a question for question answering. It is also used as the last
+    token of a sequence built with special tokens.
+- pad_token (`str`, *optional*, defaults to `"[PAD]"`):
+    The token used for padding, for example when batching sequences of different lengths.
+- cls_token (`str`, *optional*, defaults to `"[CLS]"`):
+    The classifier token which is used when doing sequence classification (classification of the whole sequence
+    instead of per-token classification). It is the first token of the sequence when built with special tokens.
+- mask_token (`str`, *optional*, defaults to `"[MASK]"`):
+    The token used for masking values. This is the token used when training this model with masked language
+    modeling. This is the token which the model will try to predict.
+- tokenize_chinese_chars (`bool`, *optional*, defaults to `True`):
+    Whether or not to tokenize Chinese characters.
+
+    This should likely be deactivated for Japanese (see this
+    [issue](https://github.com/huggingface/transformers/issues/328)).
+- strip_accents (`bool`, *optional*):
+    Whether or not to strip all accents. If this option is not specified, then it will be determined by the
+    value for `lowercase` (as in the original BERT).
+
+
+__call__方法：
+```python
+    def __call__(
+        self,
+        text: Union[TextInput, PreTokenizedInput, List[TextInput], List[PreTokenizedInput]] = None,
+        text_pair: Optional[Union[TextInput, PreTokenizedInput, List[TextInput], List[PreTokenizedInput]]] = None,
+        text_target: Union[TextInput, PreTokenizedInput, List[TextInput], List[PreTokenizedInput]] = None,
+        text_pair_target: Optional[
+            Union[TextInput, PreTokenizedInput, List[TextInput], List[PreTokenizedInput]]
+        ] = None,
+        add_special_tokens: bool = True,
+        padding: Union[bool, str, PaddingStrategy] = False,
+        truncation: Union[bool, str, TruncationStrategy] = None,
+        max_length: Optional[int] = None,
+        stride: int = 0,
+        is_split_into_words: bool = False,
+        pad_to_multiple_of: Optional[int] = None,
+        return_tensors: Optional[Union[str, TensorType]] = None,
+        return_token_type_ids: Optional[bool] = None,
+        return_attention_mask: Optional[bool] = None,
+        return_overflowing_tokens: bool = False,
+        return_special_tokens_mask: bool = False,
+        return_offsets_mapping: bool = False,
+        return_length: bool = False,
+        verbose: bool = True,
+        **kwargs,
+```
+
+参数解释：
+https://huggingface.co/docs/transformers/main_classes/tokenizer
