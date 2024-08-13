@@ -40,3 +40,23 @@ $\text{similarity} = \dfrac{x_1 \cdot x_2}{\max(\Vert x_1 \Vert _2 \cdot \Vert x
 
 输出：$(\ast_1, \ast_2)$ 取值为$(-1,1)$
 
+## 归一化
+```py
+torch.nn.functional.normalize(input, p=2.0, dim=1, eps=1e-12, out=None)
+```
+
+Perform :math:`L_p` normalization of inputs over specified dimension.
+
+For a tensor :attr:`input` of sizes :$(n_0, ..., n_{dim}, ..., n_k)$, each
+:math:`n_{dim}` -element vector :math:`v` along dimension :attr:`dim` is transformed as
+
+$v = \frac{v}{\max(\lVert v \rVert_p, \epsilon)}.$
+
+With the default arguments it uses the Euclidean norm over vectors along dimension :math:`1` for normalization.
+
+Args:
+- input: input tensor of any shape
+- p (float): the exponent value in the norm formulation. Default: 2
+- dim (int or tuple of ints): the dimension to reduce. Default: 1
+- eps (float): small value to avoid division by zero. Default: 1e-12
+- out (Tensor, optional): the output tensor. If :attr:`out` is used, this operation won't be differentiable.

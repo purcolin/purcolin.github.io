@@ -27,7 +27,7 @@ torch.nn.Dropout(p=0.5, inplace=False)
 <meta property="og:url" content="https://purcolin.github.io/post/zhong-shi-shen-du-xue-xi-%EF%BC%9Atorch.nn-chang-yong-lei.html">
 <meta property="og:image" content="https://github.githubassets.com/favicons/favicon.svg">
 <title>重识深度学习：torch.nn常用类</title>
-
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
 
 
 </head>
@@ -131,7 +131,22 @@ Default: <code class="notranslate">True</code>
 <li>eps：防止除以零所设的下线。</li>
 </ul>
 <p>输入：$x_1:(\ast_1, D, \ast_2) ; x_2:(\ast_1, D, \ast_2)$</p>
-<p>输出：$(\ast_1, \ast_2)$ 取值为$(-1,1)$</p></div>
+<p>输出：$(\ast_1, \ast_2)$ 取值为$(-1,1)$</p>
+<h2>归一化</h2>
+<div class="highlight highlight-source-python"><pre class="notranslate"><span class="pl-s1">torch</span>.<span class="pl-s1">nn</span>.<span class="pl-s1">functional</span>.<span class="pl-en">normalize</span>(<span class="pl-s1">input</span>, <span class="pl-s1">p</span><span class="pl-c1">=</span><span class="pl-c1">2.0</span>, <span class="pl-s1">dim</span><span class="pl-c1">=</span><span class="pl-c1">1</span>, <span class="pl-s1">eps</span><span class="pl-c1">=</span><span class="pl-c1">1e-12</span>, <span class="pl-s1">out</span><span class="pl-c1">=</span><span class="pl-c1">None</span>)</pre></div>
+<p>Perform :math:<code class="notranslate">L_p</code> normalization of inputs over specified dimension.</p>
+<p>For a tensor :attr:<code class="notranslate">input</code> of sizes :$(n_0, ..., n_{dim}, ..., n_k)$, each<br>
+:math:<code class="notranslate">n_{dim}</code> -element vector :math:<code class="notranslate">v</code> along dimension :attr:<code class="notranslate">dim</code> is transformed as</p>
+<p>$v = \frac{v}{\max(\lVert v \rVert_p, \epsilon)}.$</p>
+<p>With the default arguments it uses the Euclidean norm over vectors along dimension :math:<code class="notranslate">1</code> for normalization.</p>
+<p>Args:</p>
+<ul>
+<li>input: input tensor of any shape</li>
+<li>p (float): the exponent value in the norm formulation. Default: 2</li>
+<li>dim (int or tuple of ints): the dimension to reduce. Default: 1</li>
+<li>eps (float): small value to avoid division by zero. Default: 1e-12</li>
+<li>out (Tensor, optional): the output tensor. If :attr:<code class="notranslate">out</code> is used, this operation won't be differentiable.</li>
+</ul></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
