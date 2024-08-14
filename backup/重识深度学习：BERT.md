@@ -1,3 +1,4 @@
+`Gmeek-html<script src="https://fastly.jsdelivr.net/gh/stevenjoezhang/live2d-widget@latest/autoload.js"></script>`
 ## *本文为bert相关实操知识，模型结构等放到tranformer里讲。*
 
 # 模型初始化
